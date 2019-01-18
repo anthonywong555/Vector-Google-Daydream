@@ -15,9 +15,17 @@
 namespace GoogleVR.HelloVR {
   using UnityEngine;
   using UnityEngine.EventSystems;
+	using System.Collections;
+	using System.Collections.Generic;
+	using UnityEngine.Networking;
+	using System.Text;
 
   [RequireComponent(typeof(Collider))]
   public class ObjectController : MonoBehaviour {
+		private string json = @"{
+		'textEntered':'Hello World'
+	}";
+
     private Vector3 startingPosition;
     private Renderer myRenderer;
 
@@ -56,10 +64,30 @@ namespace GoogleVR.HelloVR {
       }
 #endif  // !UNITY_EDITOR
     }
+		IEnumerator PostdataEnumerator(WWW www)
+		{
+			yield return www;
+			if (www.error != null)
+			{
+				Debug.Log("Data Submitted");
+			}
+			else
+			{
+				Debug.Log(www.error);
+			}
+		}
 
     public void TeleportRandomly(BaseEventData eventData) {
       // Only trigger on left input button, which maps to
       // Daydream controller TouchPadButton and Trigger buttons.
+			string Url = "http://127.0.0.1:5000/sayText";
+			string JsonArraystring = "{\n\t\"textEntered\": \"Hello World\"\n}";
+			Hashtable headers = new Hashtable();
+			headers.Add("Content-Type", "application/json");
+			byte[] body = Encoding.UTF8.GetBytes(JsonArraystring);
+			WWW www = new WWW(Url, body, headers);
+			StartCoroutine("PostdataEnumerator", www);
+
       PointerEventData ped = eventData as PointerEventData;
       if (ped != null) {
         if (ped.button != PointerEventData.InputButton.Left) {
