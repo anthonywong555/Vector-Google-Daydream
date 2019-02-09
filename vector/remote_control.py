@@ -644,7 +644,7 @@ def handle_sayText():
     """Called from Javascript whenever the saytext text field is modified"""
     message = json.loads(request.data.decode("utf-8"))
     if flask_app.remote_control_vector:
-        flask_app.remote_control_vector.vector.say_text(message['textEntered'])
+        flask_app.remote_control_vector.text_to_say = message['textEntered']
     return ""
 
 
@@ -655,8 +655,6 @@ def handle_updateVector():
         action_queue_text = ""
         i = 1
         for action in flask_app.remote_control_vector.action_queue:
-            print("action")
-            print(action)
             action_queue_text += str(i) + ": " + flask_app.remote_control_vector.action_to_text(action) + "<br>"
             i += 1
 
