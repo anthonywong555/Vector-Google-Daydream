@@ -58,7 +58,7 @@ def create_default_image(image_width, image_height, do_gradient=False):
 
 
 flask_app = Flask(__name__)
-_default_camera_image = create_default_image(1000, 750)
+_default_camera_image = create_default_image(320, 240)
 _is_mouse_look_enabled_by_default = False
 
 
@@ -575,13 +575,6 @@ def handle_vectorImage():
     return flask_helpers.stream_video(streaming_video)
 
 
-@flask_app.route("/vectorImage.img")
-def handle_vectorImageV2():
-    if is_microsoft_browser(request):
-        return serve_single_image()
-    return flask_helpers.stream_video(streaming_video)
-
-
 def handle_key_event(key_request, is_key_down):
     message = json.loads(key_request.data.decode("utf-8"))
     if flask_app.remote_control_vector:
@@ -654,6 +647,7 @@ def handle_sayText():
         flask_app.remote_control_vector.vector.say_text(message['textEntered'])
     return ""
 
+
 @flask_app.route('/updateVector', methods=['POST'])
 def handle_updateVector():
     if flask_app.remote_control_vector:
@@ -661,6 +655,8 @@ def handle_updateVector():
         action_queue_text = ""
         i = 1
         for action in flask_app.remote_control_vector.action_queue:
+            print("action")
+            print(action)
             action_queue_text += str(i) + ": " + flask_app.remote_control_vector.action_to_text(action) + "<br>"
             i += 1
 
@@ -671,10 +667,9 @@ def handle_updateVector():
 def run():
     args = util.parse_command_args()
 
-    with anki_vector.AsyncRobot(args.serial, enable_camera_feed=True, enable_face_detection=True, enable_custom_object_detection=True, enable_nav_map_feed=True) as robot:
+    with anki_vector.AsyncRobot(args.serial, enable_camera_feed=True) as robot:
         flask_app.remote_control_vector = RemoteControlVector(robot)
-        robot.vision.enable_custom_object_detection()
-        robot.vision.enable_face_detection()
+
         robot.behavior.drive_off_charger()
 
         flask_helpers.run_flask(flask_app)
